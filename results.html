@@ -2,65 +2,63 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>黑暗人格测试结果</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary-dark: #1a1a2e;
+            --secondary-dark: #16213e;
+            --accent-color: #e94560;
+            --text-light: #f1f1f1;
+            --text-muted: #a0a0a0;
+            --card-bg: rgba(30, 30, 46, 0.7);
+            --border-color: #2d3047;
+        }
+        
         * {
-            margin: 0;
-            padding: 0;
             box-sizing: border-box;
         }
         
         body { 
-            font-family: 'Montserrat', sans-serif; 
-            max-width: 1000px; 
+            font-family: 'Arial', sans-serif; 
+            max-width: 1200px; 
             margin: 0 auto; 
-            padding: 15px; 
-            background: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%);
-            color: #e0e0e0;
+            padding: 20px; 
+            background-color: var(--primary-dark);
+            color: var(--text-light);
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(233, 69, 96, 0.1) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(0, 150, 255, 0.1) 0%, transparent 20%);
             min-height: 100vh;
-            -webkit-text-size-adjust: 100%;
         }
         
         h1, h2 { 
-            color: #ffffff; 
+            color: var(--text-light); 
             text-align: center;
-            border-bottom: 2px solid rgba(255, 255, 255, 0.1); 
+            border-bottom: 2px solid var(--border-color); 
             padding-bottom: 10px; 
-            margin-top: 20px; 
-            font-family: 'Playfair Display', serif;
-        }
-        
-        h1 {
-            font-size: clamp(1.8rem, 5vw, 2.5rem);
-            margin-top: 10px;
-        }
-        
-        h2 {
-            font-size: clamp(1.5rem, 4vw, 2rem);
+            margin-top: 25px; 
         }
         
         .subtitle {
-            color: #b8b8b8;
+            color: var(--text-muted);
             margin-bottom: 10px;
             text-align: center;
-            font-size: clamp(0.9rem, 3vw, 1.1rem);
         }
         
         .d-value-display {
-            font-size: clamp(1.5rem, 4vw, 1.8rem);
+            font-size: 1.8em;
             font-weight: bold;
-            color: #ffffff;
+            color: var(--accent-color);
             margin: 15px 0;
             padding: 15px;
-            background: rgba(30, 30, 46, 0.8);
-            border-radius: 15px;
+            background-color: var(--card-bg);
+            border-radius: 10px;
             text-align: center;
             width: 100%;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-color);
             position: relative;
             overflow: hidden;
         }
@@ -71,20 +69,28 @@
             top: 0;
             left: 0;
             width: 100%;
-            height: 4px;
-            background: linear-gradient(90deg, #8a2387, #e94057, #f27121);
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+            transform: translateX(-100%);
+            animation: shimmer 3s infinite;
+        }
+        
+        @keyframes shimmer {
+            100% {
+                transform: translateX(100%);
+            }
         }
         
         .chart-container { 
             width: 100%; 
-            max-width: 700px; 
-            height: clamp(300px, 60vw, 500px);
-            margin: 20px auto; 
-            border: 1px solid rgba(255, 255, 255, 0.1); 
+            max-width: 900px; 
+            height: 600px;
+            margin: 30px auto; 
+            border: 1px solid var(--border-color); 
             border-radius: 12px; 
-            padding: 15px; 
-            background: rgba(30, 30, 46, 0.8);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            padding: 20px; 
+            background-color: var(--card-bg);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
             position: relative;
             overflow: hidden;
         }
@@ -92,11 +98,18 @@
         .chart-container::before {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 4px;
-            background: linear-gradient(90deg, #8a2387, #e94057, #f27121);
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(233, 69, 96, 0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+            z-index: 0;
+        }
+        
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
         
         .button-container {
@@ -106,42 +119,56 @@
         
         .action-button {
             display: inline-block;
-            margin: 8px;
-            padding: 14px 24px;
-            background: linear-gradient(90deg, #8a2387, #e94057);
-            color: white;
+            margin: 10px;
+            padding: 12px 24px;
+            background-color: var(--secondary-dark);
+            color: var(--text-light);
             text-decoration: none;
-            border-radius: 50px;
-            font-weight: 600;
+            border-radius: 6px;
+            font-weight: bold;
             text-align: center;
             transition: all 0.3s ease;
-            border: none;
+            border: 1px solid var(--border-color);
             cursor: pointer;
-            font-size: clamp(0.9rem, 3vw, 1rem);
-            box-shadow: 0 4px 10px rgba(233, 64, 87, 0.3);
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+        
+        .action-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 100%;
+            background-color: var(--accent-color);
+            transition: all 0.3s ease;
+            z-index: -1;
         }
         
         .action-button:hover {
+            color: var(--text-light);
             transform: translateY(-3px);
-            box-shadow: 0 7px 15px rgba(233, 64, 87, 0.4);
+            box-shadow: 0 5px 15px rgba(233, 69, 96, 0.4);
+        }
+        
+        .action-button:hover::before {
+            width: 100%;
         }
         
         .magic-button {
-            background: linear-gradient(90deg, #e74c3c, #c0392b);
-            box-shadow: 0 4px 10px rgba(231, 76, 60, 0.3);
-        }
-        
-        .magic-button:hover {
-            box-shadow: 0 7px 15px rgba(231, 76, 60, 0.4);
+            background-color: rgba(233, 69, 96, 0.2);
+            border-color: var(--accent-color);
         }
         
         .error-message {
-            color: #e74c3c;
-            background-color: rgba(250, 219, 216, 0.1);
+            color: var(--accent-color);
+            background-color: rgba(233, 69, 96, 0.1);
             padding: 15px;
-            border-radius: 8px;
+            border-radius: 5px;
             margin: 20px 0;
-            border: 1px solid rgba(231, 76, 60, 0.3);
+            border: 1px solid rgba(233, 69, 96, 0.3);
         }
         
         /* 评语样式 */
@@ -149,63 +176,67 @@
             text-align: left; 
             margin: 20px auto 0;
             width: 100%; 
-            max-width: 700px;
+            max-width: 900px;
         }
         
         .dim-card { 
-            border: 1px solid rgba(255, 255, 255, 0.1); 
+            border: 1px solid var(--border-color); 
             padding: 15px; 
             margin-bottom: 15px; 
-            border-radius: 10px; 
-            background: rgba(30, 30, 46, 0.8);
-            font-size: clamp(0.85rem, 2.5vw, 0.95rem);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            border-radius: 8px; 
+            background-color: var(--card-bg);
+            font-size: 0.95em;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .dim-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
         }
         
         .dim-card h3 { 
             margin-top: 0; 
-            font-size: clamp(1rem, 3vw, 1.1rem);
-            color: #ffffff;
-            margin-bottom: 8px;
+            font-size: 1.1em;
+            color: var(--text-light);
         }
         
         .advice { 
             font-style: italic; 
-            color: #4CAF50; 
-            margin-top: 10px; 
-            padding-left: 10px;
-            border-left: 3px solid #4CAF50;
-            font-size: clamp(0.8rem, 2.5vw, 0.9rem);
+            color: #4dabf7; 
+            margin-top: 8px; 
+            padding-left: 8px;
+            border-left: 3px solid #4dabf7;
+            font-size: 0.9em;
         }
         
         .low-score { 
-            background: rgba(30, 46, 30, 0.6); 
+            background-color: rgba(76, 175, 80, 0.1); 
             border-left: 5px solid #4CAF50; 
         }
         
         .mid-score { 
-            background: rgba(46, 46, 30, 0.6); 
+            background-color: rgba(255, 193, 7, 0.1); 
             border-left: 5px solid #FFC107; 
         }
         
         .high-score { 
-            background: rgba(46, 30, 30, 0.6); 
+            background-color: rgba(244, 67, 54, 0.1); 
             border-left: 5px solid #F44336; 
         }
         
         .percentage-display {
             font-weight: bold;
-            color: #b8b8b8;
-            margin-bottom: 10px;
-            font-size: clamp(0.8rem, 2.5vw, 0.9rem);
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            font-size: 0.9em;
         }
         
         .highlight-section {
             margin-top: 20px;
             padding: 15px;
-            background: rgba(40, 40, 60, 0.6);
-            border-radius: 10px;
-            border-left: 4px solid #6c757d;
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            border-left: 4px solid var(--accent-color);
         }
         
         /* 角色头像样式 */
@@ -213,45 +244,44 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            margin: 0 10px;
-            width: clamp(120px, 30vw, 150px);
+            margin: 0 20px;
+            width: 150px;
         }
         
         .character-avatar {
-            width: clamp(80px, 25vw, 120px);
-            height: clamp(80px, 25vw, 120px);
+            width: 120px;
+            height: 120px;
             border-radius: 50%;
             margin: 0 auto 10px;
             position: relative;
             overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: clamp(40px, 10vw, 60px);
+            font-size: 60px;
         }
         
         .magic-avatar {
             background: linear-gradient(135deg, #e74c3c, #c0392b);
-            border: 3px solid #e74c3c;
+            border: 4px solid #e74c3c;
         }
         
         .spirit-avatar {
             background: linear-gradient(135deg, #3498db, #2980b9);
-            border: 3px solid #3498db;
+            border: 4px solid #3498db;
         }
         
         .character-name {
             font-weight: bold;
             margin-bottom: 5px;
-            font-size: clamp(1rem, 3vw, 1.2em);
-            color: #ffffff;
+            font-size: 1.2em;
         }
         
         /* 平面立体饼图样式 */
         .flat-pie-container {
-            width: clamp(200px, 60vw, 300px);
-            height: clamp(200px, 60vw, 300px);
+            width: 300px;
+            height: 300px;
             margin: 0 auto;
             position: relative;
         }
@@ -269,7 +299,7 @@
             );
             box-shadow: 
                 0 10px 20px rgba(0,0,0,0.3),
-                inset 0 0 20px rgba(255,255,255,0.2);
+                inset 0 0 20px rgba(255,255,255,0.1);
             position: relative;
             overflow: hidden;
         }
@@ -309,8 +339,8 @@
         }
         
         .character-gesture {
-            font-size: clamp(30px, 8vw, 50px);
-            margin: 0 10px;
+            font-size: 50px;
+            margin: 0 15px;
             filter: drop-shadow(2px 2px 3px rgba(0,0,0,0.3));
         }
         
@@ -322,30 +352,44 @@
             transform: rotate(-90deg);
         }
         
-        /* 移动设备优化 */
+        /* 响应式设计 */
         @media (max-width: 768px) {
             body {
-                padding: 12px;
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.5em;
+            }
+            
+            .d-value-display {
+                font-size: 1.5em;
+                padding: 10px;
             }
             
             .chart-container {
-                padding: 12px;
-                height: clamp(280px, 70vw, 400px);
+                height: 500px;
+                padding: 15px;
             }
             
-            .dim-card {
-                padding: 12px;
+            .flat-pie-container {
+                width: 250px;
+                height: 250px;
             }
             
-            .highlight-section {
-                padding: 12px;
+            .character {
+                width: 120px;
+                margin: 0 10px;
             }
             
-            .action-button {
-                padding: 12px 20px;
-                margin: 5px;
-                width: 100%;
-                max-width: 300px;
+            .character-avatar {
+                width: 100px;
+                height: 100px;
+                font-size: 50px;
+            }
+            
+            .character-gesture {
+                font-size: 40px;
             }
             
             .button-container {
@@ -353,80 +397,48 @@
                 flex-direction: column;
                 align-items: center;
             }
+            
+            .action-button {
+                width: 80%;
+                margin: 5px 0;
+            }
         }
         
         @media (max-width: 480px) {
-            body {
-                padding: 10px;
-            }
-            
             .chart-container {
+                height: 400px;
                 padding: 10px;
-                height: clamp(250px, 75vw, 350px);
             }
             
-            .d-value-display {
-                padding: 12px;
-            }
-            
-            .character-with-gesture {
-                flex-direction: column;
-            }
-            
-            .character-gesture {
-                margin: 5px 0;
-            }
-            
-            .magic-gesture, .spirit-gesture {
-                transform: none;
-            }
-        }
-        
-        /* 超小屏幕优化 */
-        @media (max-width: 360px) {
             .flat-pie-container {
-                width: 180px;
-                height: 180px;
+                width: 200px;
+                height: 200px;
             }
             
             .character {
                 width: 100px;
-                margin: 0 5px;
             }
             
             .character-avatar {
-                width: 70px;
-                height: 70px;
-                font-size: 35px;
-            }
-        }
-        
-        /* 横屏优化 */
-        @media (max-width: 768px) and (orientation: landscape) {
-            .chart-container {
-                height: 300px;
+                width: 80px;
+                height: 80px;
+                font-size: 40px;
             }
             
-            .character-with-gesture {
-                flex-direction: row;
+            .character-gesture {
+                font-size: 30px;
+            }
+            
+            .dim-card {
+                padding: 10px;
             }
         }
         
-        /* 动画效果 */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .chart-container, .dim-card, .d-value-display {
-            animation: fadeIn 0.5s ease;
-        }
-        
-        /* 高DPI屏幕优化 */
-        @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
-            .d-value-display::before, .chart-container::before {
-                height: 3px;
-            }
+        /* 雷达图特定样式 */
+        .radar-canvas-container {
+            position: relative;
+            z-index: 1;
+            height: 100%;
         }
     </style>
 </head>
@@ -440,7 +452,9 @@
     </div>
 
     <div class="chart-container">
-        <canvas id="radarChart"></canvas>
+        <div class="radar-canvas-container">
+            <canvas id="radarChart"></canvas>
+        </div>
     </div>
     
     <div class="button-container">
@@ -788,12 +802,13 @@
                         datasets: [{
                             label: '我的得分',
                             data: userScorePercentages, 
-                            backgroundColor: 'rgba(255, 182, 193, 0.4)',
-                            borderColor: 'rgb(255, 105, 180)',
-                            pointBackgroundColor: 'rgb(255, 105, 180)',
+                            backgroundColor: 'rgba(233, 69, 96, 0.4)',
+                            borderColor: 'rgb(233, 69, 96)',
+                            pointBackgroundColor: 'rgb(233, 69, 96)',
                             pointBorderColor: '#fff',
-                            pointRadius: 4,
-                            borderWidth: 2
+                            pointRadius: 5,
+                            pointHoverRadius: 7,
+                            borderWidth: 3
                         }, {
                             label: '我的排名',
                             data: userRankings, 
@@ -801,8 +816,9 @@
                             borderColor: 'rgb(54, 162, 235)',
                             pointBackgroundColor: 'rgb(54, 162, 235)',
                             pointBorderColor: '#fff',
-                            pointRadius: 4,
-                            borderWidth: 2
+                            pointRadius: 5,
+                            pointHoverRadius: 7,
+                            borderWidth: 3
                         }]
                     },
                     options: {
@@ -820,19 +836,20 @@
                                 suggestedMin: 0,
                                 suggestedMax: 100,
                                 ticks: {
-                                    stepSize: 10,
-                                    callback: function(value) {
-                                        return value + '%'; 
-                                    },
-                                    backdropColor: 'rgba(0, 0, 0, 0.5)',
-                                    color: '#e0e0e0'
+                                    stepSize: 20,
+                                    backdropColor: 'transparent',
+                                    color: 'rgba(255, 255, 255, 0.7)',
+                                    font: {
+                                        size: 12,
+                                        weight: 'bold'
+                                    }
                                 },
                                 pointLabels: {
                                     font: {
-                                        size: 13,
+                                        size: 14,
                                         weight: 'bold'
                                     },
-                                    color: '#ffffff'
+                                    color: 'rgba(255, 255, 255, 0.9)'
                                 }
                             }
                         },
@@ -841,18 +858,29 @@
                                 position: 'top',
                                 labels: {
                                     font: {
-                                        size: 14
+                                        size: 14,
+                                        weight: 'bold'
                                     },
-                                    padding: 20,
-                                    color: '#ffffff'
+                                    color: 'rgba(255, 255, 255, 0.9)',
+                                    padding: 20
                                 }
                             },
                             tooltip: {
+                                backgroundColor: 'rgba(30, 30, 46, 0.9)',
+                                titleColor: 'rgba(255, 255, 255, 0.9)',
+                                bodyColor: 'rgba(255, 255, 255, 0.8)',
+                                borderColor: 'rgba(233, 69, 96, 0.5)',
+                                borderWidth: 1,
                                 callbacks: {
                                     label: function(context) {
                                         return context.dataset.label + ': ' + context.raw + '%';
                                     }
                                 }
+                            }
+                        },
+                        elements: {
+                            line: {
+                                tension: 0.1
                             }
                         }
                     }
