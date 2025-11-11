@@ -181,8 +181,7 @@
         }
         
         @media (max-width: 768px) {
-            /* ... (你的媒体查询样式保持不变) ... */
-             .container {
+            .container {
                 padding: 25px;
             }
             h1 {
@@ -248,13 +247,9 @@
         const accessCodeInput = document.getElementById("accessCodeInput");
         const submitButton = document.getElementById("submitButton");
         
-        // 1. 定义后端的 API URL
-        // !!! 注意：这是本地测试地址。部署到 Netlify 之前，
-        // 必须将其替换为你的 Koyeb 公共 URL !!!
-        // (例如: 'https://overall-carolan-boyn-7a3aea8b.koyeb.app/api/check-access-code')
-        const API_URL = 'overall-carolan-boyn-7a3aea8b.koyeb.app/';
+        // 修正后的 API URL - 添加了协议和完整路径
+        const API_URL = 'https://overall-carolan-boyn-7a3aea8b.koyeb.app/api/check-access-code';
         
-        // 2. 将点击事件监听器改为 async 
         submitButton.addEventListener("click", async function() {
             const userInput = accessCodeInput.value.trim();
             
@@ -268,20 +263,27 @@
             submitButton.textContent = "验证中...";
 
             try {
-                // 3. 发送 POST 请求到后端
+                // 发送 POST 请求到后端
                 const response = await fetch(API_URL, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ accessCode: userInput }) // 将访问码作为JSON发送
+                    body: JSON.stringify({ accessCode: userInput })
                 });
+
+                // 先检查响应状态
+                if (!response.ok) {
+                    // 如果响应状态不是 200-299，尝试获取错误信息
+                    const errorData = await response.json().catch(() => ({ message: "服务器错误" }));
+                    throw new Error(errorData.message || `服务器错误: ${response.status}`);
+                }
 
                 const result = await response.json();
 
-                // 4. 根据后端的响应执行操作
-                if (response.ok && result.success === true) {
-                    // 验证成功: 执行你原来的成功动画和跳转
+                // 根据后端的响应执行操作 - 使用 result.valid 而不是 result.success
+                if (result.valid === true) {
+                    // 验证成功
                     submitButton.textContent = "验证成功...";
                     submitButton.style.background = "linear-gradient(90deg, #4CAF50, #45a049)";
                     
@@ -290,14 +292,14 @@
                     }, 800);
                     
                 } else {
-                    // 验证失败: 抛出错误，由 catch 块处理
+                    // 验证失败
                     throw new Error(result.message || "访问码错误");
                 }
 
             } catch (error) {
                 console.error("访问码验证失败:", error);
                 
-                // 执行你原来的失败动画
+                // 执行失败动画
                 accessCodeInput.style.borderColor = "#e94057";
                 accessCodeInput.style.boxShadow = "0 0 0 3px rgba(233, 64, 87, 0.3)";
                 
@@ -313,10 +315,10 @@
             }
         });
         
-        // 按Enter键也可以提交 (你原来的逻辑)
+        // 按Enter键也可以提交
         accessCodeInput.addEventListener("keypress", function(event) {
             if (event.key === "Enter") {
-                event.preventDefault(); // 阻止表单默认提交
+                event.preventDefault();
                 submitButton.click();
             }
         });
