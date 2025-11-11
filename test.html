@@ -2,52 +2,269 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>黑暗人格测试</title>
     <style>
+        :root {
+            --primary-dark: #1a1a2e;
+            --secondary-dark: #16213e;
+            --accent-color: #e94560;
+            --text-light: #f1f1f1;
+            --text-muted: #a0a0a0;
+            --card-bg: rgba(30, 30, 46, 0.8);
+            --border-color: #2d3047;
+            --consent-green: #4CAF50;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
         body { 
-            font-family: sans-serif; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
             max-width: 800px; 
             margin: 0 auto; 
             padding: 20px; 
             line-height: 1.6;
+            background-color: var(--primary-dark);
+            color: var(--text-light);
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(233, 69, 96, 0.1) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(0, 150, 255, 0.1) 0%, transparent 20%);
         }
+        
+        h1 {
+            text-align: center;
+            margin: 20px 0 30px;
+            color: var(--text-light);
+            font-size: 2.2rem;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+            position: relative;
+            padding-bottom: 15px;
+        }
+        
+        h1::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 3px;
+            background: linear-gradient(to right, transparent, var(--accent-color), transparent);
+        }
+        
         .consent-section {
-            background-color: #f9f9f9;
-            padding: 20px;
-            border-radius: 8px;
+            background-color: var(--card-bg);
+            padding: 25px;
+            border-radius: 12px;
             margin: 20px 0;
-            border-left: 4px solid #4CAF50;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 150px);
+            min-height: 600px;
         }
+        
+        h2 {
+            color: var(--text-light);
+            margin-bottom: 15px;
+            text-align: center;
+            font-size: 1.8rem;
+        }
+        
+        h3 {
+            color: var(--accent-color);
+            margin: 15px 0 10px;
+            font-size: 1.3rem;
+        }
+        
         .consent-text {
-            height: 200px;
+            flex: 1;
             overflow-y: auto;
-            border: 1px solid #ddd;
-            padding: 15px;
-            background-color: white;
+            border: 1px solid var(--border-color);
+            padding: 20px;
+            background-color: rgba(0, 0, 0, 0.2);
             margin: 15px 0;
+            border-radius: 8px;
+            line-height: 1.7;
         }
+        
+        .consent-text ul {
+            margin-left: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .consent-text li {
+            margin-bottom: 8px;
+        }
+        
+        .consent-text p {
+            margin-bottom: 15px;
+        }
+        
+        .consent-controls {
+            margin-top: auto;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+        }
+        
         .checkbox-container {
             margin: 15px 0;
+            display: flex;
+            align-items: center;
+            font-size: 1.1rem;
         }
+        
+        .checkbox-container input[type="checkbox"] {
+            width: 22px;
+            height: 22px;
+            margin-right: 12px;
+            accent-color: var(--consent-green);
+            cursor: pointer;
+        }
+        
+        .checkbox-container label {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+        
         button { 
-            background-color: #4CAF50; 
+            background-color: var(--consent-green); 
             color: white; 
-            padding: 12px 24px; 
+            padding: 14px 28px; 
             border: none; 
-            border-radius: 4px; 
+            border-radius: 6px; 
             cursor: pointer; 
-            font-size: 16px; 
-            margin: 10px 5px;
+            font-size: 1.1rem; 
+            font-weight: bold;
+            margin: 10px 0;
+            width: 100%;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
         }
+        
         button:hover { 
-            background-color: #45a049; 
+            background-color: #3d8b40;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
         }
+        
+        button:active {
+            transform: translateY(1px);
+        }
+        
         button:disabled {
-            background-color: #cccccc;
+            background-color: #555;
+            color: #888;
             cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
         }
+        
+        button:disabled:hover {
+            transform: none;
+            box-shadow: none;
+        }
+        
         .hidden {
             display: none;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            body {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+                margin: 10px 0 20px;
+            }
+            
+            .consent-section {
+                padding: 20px;
+                height: auto;
+                min-height: 500px;
+            }
+            
+            h2 {
+                font-size: 1.5rem;
+            }
+            
+            h3 {
+                font-size: 1.2rem;
+            }
+            
+            .consent-text {
+                padding: 15px;
+            }
+            
+            .checkbox-container {
+                font-size: 1rem;
+            }
+            
+            button {
+                padding: 12px 24px;
+                font-size: 1rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.6rem;
+            }
+            
+            .consent-section {
+                padding: 15px;
+            }
+            
+            h2 {
+                font-size: 1.3rem;
+            }
+            
+            .consent-text {
+                padding: 12px;
+            }
+            
+            .checkbox-container {
+                font-size: 0.95rem;
+            }
+            
+            .checkbox-container input[type="checkbox"] {
+                width: 20px;
+                height: 20px;
+            }
+        }
+        
+        /* 滚动条样式 */
+        .consent-text::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .consent-text::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+        }
+        
+        .consent-text::-webkit-scrollbar-thumb {
+            background: var(--accent-color);
+            border-radius: 4px;
+        }
+        
+        .consent-text::-webkit-scrollbar-thumb:hover {
+            background: #d43f5a;
         }
     </style>
 </head>
@@ -78,16 +295,29 @@
             </ul>
             
             <p>如果您对研究有任何疑问，请联系研究人员。</p>
+            
+            <h3>测试内容说明：</h3>
+            <p>本测试将评估您在多个黑暗人格特质维度上的倾向，包括但不限于：</p>
+            <ul>
+                <li>马基雅维利主义：策略性操纵和利用他人的倾向</li>
+                <li>自恋：过度自我中心和寻求赞美的倾向</li>
+                <li>精神变态：冲动、缺乏同理心和责任感的倾向</li>
+                <li>施虐倾向：从他人痛苦中获得愉悦的倾向</li>
+            </ul>
+            
+            <p>请注意，这些特质在适度范围内是正常的，本测试旨在帮助您更好地了解自己，而非进行临床诊断。</p>
         </div>
         
-        <div class="checkbox-container">
-            <label>
-                <input type="checkbox" id="consentCheckbox">
-                我已阅读并理解上述信息，同意参与本研究
-            </label>
+        <div class="consent-controls">
+            <div class="checkbox-container">
+                <label>
+                    <input type="checkbox" id="consentCheckbox">
+                    我已阅读并理解上述信息，同意参与本研究
+                </label>
+            </div>
+            
+            <button id="nextButton" disabled>开始测试</button>
         </div>
-        
-        <button id="nextButton" disabled>开始测试</button>
     </div>
 
     <!-- 测试表单部分（原本应该有70个问题，但这里简化了） -->
