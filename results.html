@@ -352,7 +352,7 @@
             transform: rotate(-90deg);
         }
         
-        /* 响应式设计 */
+        /* 响应式设计 - 重点优化雷达图显示 */
         @media (max-width: 768px) {
             body {
                 padding: 10px;
@@ -367,9 +367,10 @@
                 padding: 10px;
             }
             
+            /* 重点优化：调整雷达图容器尺寸和内边距 */
             .chart-container {
                 height: 500px;
-                padding: 15px;
+                padding: 10px;
             }
             
             .flat-pie-container {
@@ -405,9 +406,10 @@
         }
         
         @media (max-width: 480px) {
+            /* 重点优化：在更小的屏幕上进一步调整雷达图 */
             .chart-container {
-                height: 400px;
-                padding: 10px;
+                height: 450px;
+                padding: 5px;
             }
             
             .flat-pie-container {
@@ -795,6 +797,12 @@
             }
 
             try {
+                // 根据屏幕宽度动态调整字体大小
+                const screenWidth = window.innerWidth;
+                const pointLabelFontSize = screenWidth < 768 ? 10 : 14;
+                const tickFontSize = screenWidth < 768 ? 10 : 12;
+                const legendFontSize = screenWidth < 768 ? 12 : 14;
+
                 const config = {
                     type: 'radar',
                     data: {
@@ -806,8 +814,8 @@
                             borderColor: 'rgb(233, 69, 96)',
                             pointBackgroundColor: 'rgb(233, 69, 96)',
                             pointBorderColor: '#fff',
-                            pointRadius: 5,
-                            pointHoverRadius: 7,
+                            pointRadius: screenWidth < 768 ? 4 : 5,
+                            pointHoverRadius: screenWidth < 768 ? 5 : 7,
                             borderWidth: 3
                         }, {
                             label: '我的排名',
@@ -816,8 +824,8 @@
                             borderColor: 'rgb(54, 162, 235)',
                             pointBackgroundColor: 'rgb(54, 162, 235)',
                             pointBorderColor: '#fff',
-                            pointRadius: 5,
-                            pointHoverRadius: 7,
+                            pointRadius: screenWidth < 768 ? 4 : 5,
+                            pointHoverRadius: screenWidth < 768 ? 5 : 7,
                             borderWidth: 3
                         }]
                     },
@@ -840,13 +848,13 @@
                                     backdropColor: 'transparent',
                                     color: 'rgba(255, 255, 255, 0.7)',
                                     font: {
-                                        size: 12,
+                                        size: tickFontSize,
                                         weight: 'bold'
                                     }
                                 },
                                 pointLabels: {
                                     font: {
-                                        size: 14,
+                                        size: pointLabelFontSize,
                                         weight: 'bold'
                                     },
                                     color: 'rgba(255, 255, 255, 0.9)'
@@ -858,7 +866,7 @@
                                 position: 'top',
                                 labels: {
                                     font: {
-                                        size: 14,
+                                        size: legendFontSize,
                                         weight: 'bold'
                                     },
                                     color: 'rgba(255, 255, 255, 0.9)',
