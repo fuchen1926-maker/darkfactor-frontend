@@ -153,6 +153,13 @@
             transform: translateY(-3px);
             box-shadow: 0 7px 20px rgba(233, 64, 87, 0.4);
         }
+
+        #submitButton:disabled {
+            background: #555;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
         
         #submitButton:active {
             transform: translateY(-1px);
@@ -174,22 +181,19 @@
         }
         
         @media (max-width: 768px) {
-            .container {
+            /* ... (你的媒体查询样式保持不变) ... */
+             .container {
                 padding: 25px;
             }
-            
             h1 {
                 font-size: 2rem;
             }
-            
             .dimensions {
                 grid-template-columns: 1fr;
             }
-            
             .input-group {
                 flex-direction: column;
             }
-            
             #accessCodeInput {
                 width: 100%;
             }
@@ -199,7 +203,6 @@
             .container {
                 padding: 20px;
             }
-            
             h1 {
                 font-size: 1.8rem;
             }
@@ -234,8 +237,7 @@
                 <input type="text" id="accessCodeInput" placeholder="输入访问码...">
                 <button id="submitButton">进入测试</button>
             </div>
-            <p class="hint">提示：访问码为 "123"</p>
-        </div>
+            </div>
         
         <div class="footer">
             <p>本测试仅供学术研究使用，所有数据将严格保密</p>
@@ -245,35 +247,76 @@
     <script>
         const accessCodeInput = document.getElementById("accessCodeInput");
         const submitButton = document.getElementById("submitButton");
-        const CORRECT_CODE = "123"; // 硬编码的访问码
-
-        submitButton.addEventListener("click", function() {
+        
+        // 1. 定义后端的 API URL
+        // !!! 注意：这是本地测试地址。部署到 Netlify 之前，
+        // 必须将其替换为你的 Koyeb 公共 URL !!!
+        // (例如: 'https://overall-carolan-boyn-7a3aea8b.koyeb.app/api/check-access-code')
+        const API_URL = 'overall-carolan-boyn-7a3aea8b.koyeb.app/';
+        
+        // 2. 将点击事件监听器改为 async 
+        submitButton.addEventListener("click", async function() {
             const userInput = accessCodeInput.value.trim();
             
-            if (userInput === CORRECT_CODE) {
-                // 添加成功动画效果
-                submitButton.textContent = "验证成功...";
-                submitButton.style.background = "linear-gradient(90deg, #4CAF50, #45a049)";
+            if (!userInput) {
+                alert("请输入访问码。");
+                return;
+            }
+
+            // 禁用按钮，防止重复点击
+            submitButton.disabled = true;
+            submitButton.textContent = "验证中...";
+
+            try {
+                // 3. 发送 POST 请求到后端
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ accessCode: userInput }) // 将访问码作为JSON发送
+                });
+
+                const result = await response.json();
+
+                // 4. 根据后端的响应执行操作
+                if (response.ok && result.success === true) {
+                    // 验证成功: 执行你原来的成功动画和跳转
+                    submitButton.textContent = "验证成功...";
+                    submitButton.style.background = "linear-gradient(90deg, #4CAF50, #45a049)";
+                    
+                    setTimeout(() => {
+                        window.location.href = "test.html"; // 跳转到同意书页面
+                    }, 800);
+                    
+                } else {
+                    // 验证失败: 抛出错误，由 catch 块处理
+                    throw new Error(result.message || "访问码错误");
+                }
+
+            } catch (error) {
+                console.error("访问码验证失败:", error);
                 
-                setTimeout(() => {
-                    window.location.href = "test.html"; 
-                }, 800);
-            } else {
-                // 添加错误动画效果
+                // 执行你原来的失败动画
                 accessCodeInput.style.borderColor = "#e94057";
                 accessCodeInput.style.boxShadow = "0 0 0 3px rgba(233, 64, 87, 0.3)";
                 
                 setTimeout(() => {
-                    alert("访问码错误，请输入正确的访问码"); 
+                    alert(error.message || "无法连接到服务器，请稍后再试。"); 
+                    // 恢复样式
                     accessCodeInput.style.borderColor = "rgba(255, 255, 255, 0.1)";
                     accessCodeInput.style.boxShadow = "none";
+                    // 恢复按钮
+                    submitButton.disabled = false;
+                    submitButton.textContent = "进入测试";
                 }, 300);
             }
         });
         
-        // 按Enter键也可以提交
+        // 按Enter键也可以提交 (你原来的逻辑)
         accessCodeInput.addEventListener("keypress", function(event) {
             if (event.key === "Enter") {
+                event.preventDefault(); // 阻止表单默认提交
                 submitButton.click();
             }
         });
