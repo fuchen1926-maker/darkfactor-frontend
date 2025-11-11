@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>人格测试问卷</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .question-container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .question {
+            font-size: 18px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .option {
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .option:hover {
+            border-color: #4CAF50;
+            background-color: #f9f9f9;
+        }
+        .option.selected {
+            border-color: #4CAF50;
+            background-color: #e8f5e8;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background-color: #e0e0e0;
+            border-radius: 5px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        .progress {
+            height: 100%;
+            background-color: #4CAF50;
+            transition: width 0.3s ease;
+        }
+        .progress-text {
+            text-align: center;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            cursor: pointer;
+            display: none; /* 默认隐藏，最后一题后显示 */
+        }
+        .submit-btn:hover {
+            background-color: #45a049;
+        }
+        input[type="radio"] {
+            display: none;
+        }
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        .nav-btn {
+            padding: 10px 20px;
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .nav-btn:hover {
+            background-color: #5a6268;
+        }
+        .nav-btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-text">进度: <span id="progress">1</span>/70</div>
+    <div class="progress-bar">
+        <div class="progress" id="progress-bar"></div>
+    </div>
+
+    <form id="questionnaire-form">
+        <!-- 问题容器，每次只显示一题 -->
+        <div class="question-container" id="current-question">
+            <!-- 问题内容将通过JavaScript动态加载 -->
+        </div>
+
+        <!-- 导航按钮 -->
+        <div class="navigation">
+            <button type="button" class="nav-btn" id="prev-btn" disabled>上一题</button>
+            <button type="button" class="nav-btn" id="next-btn" style="display: none;">下一题</button>
+        </div>
+
+        <!-- 提交按钮（最后一题后显示） -->
+        <button type="submit" class="submit-btn" id="submit-btn">提交测试</button>
+    </form>
+
+    <script>
+        // *** JavaScript 大脑：分页显示、收集、发送、跳转 ***
+        
+        const API_URL = 'http://localhost:3000/api/rankings'; 
+        
+        // 维度定义 (必须与后端 index.js 中的 DIMENSIONS 数组一致)
+        const DIMENSIONS = [
+            'egoism', 'greed', 'mach', 'moral', 'narcissism',
+            'power', 'psychopathy', 'sadism', 'selfcentered', 'spitefulness'
+        ];
+        
+        // 每个维度有多少个问题 (70 / 10 = 7)
+        const Q_PER_DIMENSION = 7;
+
+        // 存储用户答案 (70个元素的数组，初始值为 null)
+        let userAnswers = new Array(70).fill(null);
+        let currentQuestionIndex = 0; // 当前显示的题目索引 (0 到 69)
+
+        // 选项文本 (修正为 5 个，对应 value 1-5)
+        const OPTIONS = [
+            "非常不同意", // 对应 value=1
+            "不同意",      // 对应 value=2
+            "中立",        // 对应 value=3
+            "同意",        // 对应 value=4
+            "非常同意"     // 对应 value=5
+        ];
+        
+        // 70 个问题数据
+        const QUESTIONS = [
+            // egoism (0-6)
+            "我认为自己的利益是最重要的",
+            "我通常会优先考虑自己的需求",
+            "对我来说，个人成功比团队成功更重要",
+            "我认为自私在某些情况下是必要的",
+            "我经常把自己的利益放在首位",
+            "我相信适度的利己主义是健康的",
+            "我倾向于先考虑自己再考虑他人",
+
+            // greed (7-13)
+            "我总是想要更多，无论已经拥有多少",
+            "物质财富对我来说非常重要",
+            "我经常羡慕别人拥有的东西",
+            "我觉得自己永远无法满足",
+            "我喜欢积累财富和资源",
+            "拥有更多会让我感到安全",
+            "我很难对现有的成就感到满足",
+
+            // mach (14-20)
+            "我认为手段是为目的服务的",
+            "在竞争中，我会使用任何必要的方法获胜",
+            "我相信成功需要一定的操控能力",
+            "我认为在商业中道德是次要的",
+            "我擅长利用他人来实现我的目标",
+            "我相信现实世界需要现实的手段",
+            "我认为软弱的道德观会阻碍成功",
+
+            // moral (21-27)
+            "我坚持自己的道德原则",
+            "诚实对我来说至关重要",
+            "即使在无人知晓的情况下，我也会做正确的事",
+            "我相信道德行为会带来好的结果",
+            "我努力遵守社会道德规范",
+            "我认为道德是社会的基石",
+            "我重视诚信胜过利益",
+
+            // narcissism (28-34)
+            "我认为自己比大多数人更特别",
+            "我期待别人认可我的成就",
+            "我喜欢成为关注的焦点",
+            "我相信自己值得特殊待遇",
+            "我经常思考自己的优点和才华",
+            "我觉得普通人很难理解我",
+            "我对自己有很高的评价",
+
+            // power (35-41)
+            "我喜欢控制和影响他人",
+            "权力对我来说很有吸引力",
+            "我享受对他人的支配感",
+            "我认为权力是成功的关键",
+            "我喜欢在群体中担任领导角色",
+            "我寻求能够施加影响的位置",
+            "我相信权力能够带来尊重",
+
+            // psychopathy (42-48)
+            "我很少感到愧疚或后悔",
+            "我对别人的痛苦不太敏感",
+            "我能冷静地做出困难的决定",
+            "情绪波动会影响我的判断",
+            "我能够轻易地从挫折中恢复",
+            "我不太在意社会规范",
+            "我做事时不太考虑后果",
+
+            // sadism (49-55)
+            "我有时会享受他人的不幸",
+            "看到别人痛苦会让我感到满足",
+            "我喜欢在竞争中彻底击败对手",
+            "我有时会故意激怒他人",
+            "强势的行为让我感到兴奋",
+            "我喜欢在争论中占据上风",
+            "我欣赏强硬无情的领导风格",
+
+            // selfcentered (56-62)
+            "我经常谈论自己的事情",
+            "我认为自己的问题比别人的更重要",
+            "我很难真正理解他人的感受",
+            "我倾向于从自己的角度看待一切",
+            "我对他人的事情不太感兴趣",
+            "我认为每个人都应该自己解决问题",
+            "我优先考虑自己的情感需求",
+
+            // spitefulness (63-69)
+            "我有时会故意妨碍他人",
+            "如果被冒犯，我一定会报复",
+            "我宁愿两败俱伤也不愿让步",
+            "我难以原谅那些伤害过我的人",
+            "我会记住每一个对我不公的人",
+            "我有时会为了报复而牺牲自己的利益",
+            "我相信以牙还牙是公平的"
+        ];
+
+        // 初始化问卷
+        function initQuestionnaire() {
+            showQuestion(currentQuestionIndex);
+            updateProgress();
+            setupNavigation();
+        }
+
+        // 显示指定索引的问题
+        function showQuestion(index) {
+            // 确保索引在有效范围内
+            if (index < 0) index = 0;
+            if (index >= QUESTIONS.length) index = QUESTIONS.length - 1;
+            
+            currentQuestionIndex = index;
+            
+            const container = document.getElementById('current-question');
+            
+            container.innerHTML = `
+                <div class="question">${index + 1}. ${QUESTIONS[index]}</div>
+                <div class="options">
+                    ${OPTIONS.map((option, optionIndex) => `
+                        <div class="option" data-value="${optionIndex + 1}">
+                            ${option}
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+
+            // 如果之前已经选择过，恢复选择状态
+            if (userAnswers[index] !== null) {
+                const selectedOption = container.querySelector(`.option[data-value="${userAnswers[index]}"]`);
+                if (selectedOption) {
+                    selectedOption.classList.add('selected');
+                }
+            }
+
+            // 添加选项点击事件
+            container.querySelectorAll('.option').forEach(option => {
+                option.addEventListener('click', () => {
+                    // 移除其他选项的选中状态
+                    container.querySelectorAll('.option').forEach(opt => {
+                        opt.classList.remove('selected');
+                    });
+                    
+                    // 设置当前选项为选中状态
+                    option.classList.add('selected');
+                    
+                    // 保存答案
+                    const value = parseInt(option.getAttribute('data-value'));
+                    userAnswers[index] = value;
+                    
+                    // 修复：只有在不是最后一题时才自动跳转
+                    if (index < QUESTIONS.length - 1) {
+                        setTimeout(() => {
+                            // 再次确认当前索引有效
+                            if (currentQuestionIndex === index) {
+                                currentQuestionIndex++;
+                                showQuestion(currentQuestionIndex);
+                                updateProgress();
+                                updateNavigation();
+                            }
+                        }, 300);
+                    } else {
+                        // 如果是最后一题，只更新导航状态，不跳转
+                        updateNavigation();
+                    }
+                });
+            });
+        }
+
+        // 设置导航按钮事件
+        function setupNavigation() {
+            document.getElementById('prev-btn').addEventListener('click', () => {
+                if (currentQuestionIndex > 0) {
+                    currentQuestionIndex--;
+                    showQuestion(currentQuestionIndex);
+                    updateProgress();
+                    updateNavigation();
+                }
+            });
+
+            document.getElementById('next-btn').addEventListener('click', () => {
+                if (currentQuestionIndex < QUESTIONS.length - 1 && userAnswers[currentQuestionIndex] !== null) {
+                    currentQuestionIndex++;
+                    showQuestion(currentQuestionIndex);
+                    updateProgress();
+                    updateNavigation();
+                }
+            });
+        }
+
+        // 更新导航按钮状态
+        function updateNavigation() {
+            const prevBtn = document.getElementById('prev-btn');
+            const nextBtn = document.getElementById('next-btn');
+            const submitBtn = document.getElementById('submit-btn');
+            
+            // 确保当前题目索引不会超出范围
+            if (currentQuestionIndex >= QUESTIONS.length) {
+                currentQuestionIndex = QUESTIONS.length - 1;
+            }
+            
+            // 更新上一题按钮
+            prevBtn.disabled = currentQuestionIndex === 0;
+            
+            // 更新下一题按钮（只在已回答当前题且不是最后一题时显示）
+            if (currentQuestionIndex < QUESTIONS.length - 1) {
+                nextBtn.style.display = userAnswers[currentQuestionIndex] !== null ? 'block' : 'none';
+                submitBtn.style.display = 'none';
+            } else {
+                nextBtn.style.display = 'none';
+                // 如果是最后一题且已回答，显示提交按钮
+                if (userAnswers[currentQuestionIndex] !== null) {
+                    submitBtn.style.display = 'block';
+                }
+            }
+        }
+
+        // 更新进度条
+        function updateProgress() {
+            const progress = ((currentQuestionIndex + 1) / QUESTIONS.length) * 100;
+            document.getElementById('progress-bar').style.width = `${progress}%`;
+            document.getElementById('progress').textContent = currentQuestionIndex + 1;
+            
+            // 确保进度不会超过100%
+            if (currentQuestionIndex + 1 > QUESTIONS.length) {
+                document.getElementById('progress').textContent = QUESTIONS.length;
+            }
+        }
+
+        // 提交按钮的监听事件
+        document.getElementById('questionnaire-form').addEventListener('submit', async (event) => {
+            event.preventDefault(); // 阻止表单默认提交（刷新页面）
+            
+            // 1. 收集和分组分数
+            const userScores = {};
+            let allAnswered = true;
+            
+            // 循环处理所有 70 个问题
+            for (let i = 0; i < 70; i++) {
+                if (userAnswers[i] === null) {
+                    allAnswered = false;
+                    break;
+                }
+                
+                const score = userAnswers[i];
+                
+                // 计算当前问题属于哪个维度 (例如 i=0 到 i=6 属于维度0 'egoism')
+                const dimIndex = Math.floor(i / Q_PER_DIMENSION); 
+                const dimName = DIMENSIONS[dimIndex];
+                
+                // 初始化维度分数 (如果不存在则为 0)
+                userScores[dimName] = (userScores[dimName] || 0) + score;
+            }
+
+            if (!allAnswered) {
+                alert("请回答所有问题才能查看结果！");
+                // 跳转到第一个未回答的问题
+                const firstUnanswered = userAnswers.findIndex(answer => answer === null);
+                if (firstUnanswered !== -1) {
+                    currentQuestionIndex = firstUnanswered;
+                    showQuestion(currentQuestionIndex);
+                    updateProgress();
+                    updateNavigation();
+                }
+                return;
+            }
+
+            // 2. 发送 POST 请求到后端
+            try {
+                console.log("发送到后端的最终分数结构:", userScores);
+
+                const response = await fetch(API_URL, {
+                    method: 'POST', 
+                    headers: {
+                        'Content-Type': 'application/json' 
+                    },
+                    body: JSON.stringify(userScores) 
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(`后端错误: ${response.status} - ${errorData.error}`);
+                }
+                
+                // 3. 接收后端返回的结果 (包含排名)
+                const result = await response.json();
+                console.log("后端返回的完整结果 (分数和排名):", result);
+                
+                // 4. 带着数据跳转到结果页
+                redirectToResults(result); 
+
+            } catch (error) {
+                console.error("通信或计算失败:", error);
+                alert(`通信失败，请检查后端服务器是否运行在 ${API_URL}`);
+            }
+        });
+
+        // 跳转函数：将所有数据编码到 URL 中
+        function redirectToResults(data) {
+            let params = '';
+            
+            // 编码用户自己的分数
+            for (const dim of DIMENSIONS) {
+                params += `score_${dim}=${data.userScores[dim]}&`;
+            }
+            
+            // 编码排名百分比
+            for (const dim of DIMENSIONS) {
+                params += `rank_${dim}=${data.rankings[dim]}&`;
+            }
+
+            // 移除末尾的 & 符号
+            params = params.slice(0, -1);
+            
+            // 跳转
+            window.location.href = `results.html?${params}`;
+        }
+
+        // 页面加载完成后初始化问卷
+        document.addEventListener('DOMContentLoaded', initQuestionnaire);
+    </script>
+</body>
+</html>

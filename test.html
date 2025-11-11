@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>黑暗人格测试</title>
+    <style>
+        body { 
+            font-family: sans-serif; 
+            max-width: 800px; 
+            margin: 0 auto; 
+            padding: 20px; 
+            line-height: 1.6;
+        }
+        .consent-section {
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #4CAF50;
+        }
+        .consent-text {
+            height: 200px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 15px;
+            background-color: white;
+            margin: 15px 0;
+        }
+        .checkbox-container {
+            margin: 15px 0;
+        }
+        button { 
+            background-color: #4CAF50; 
+            color: white; 
+            padding: 12px 24px; 
+            border: none; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            font-size: 16px; 
+            margin: 10px 5px;
+        }
+        button:hover { 
+            background-color: #45a049; 
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>黑暗人格测试</h1>
+    
+    <div class="consent-section">
+        <h2>研究知情同意书</h2>
+        <div class="consent-text">
+            <p>感谢您参与本次心理学研究。本研究旨在探索人格特质与社会行为之间的关系。</p>
+            
+            <h3>研究说明：</h3>
+            <ul>
+                <li>本研究包含70个问题，大约需要10-15分钟完成</li>
+                <li>所有问题都是关于您的个人观点和感受</li>
+                <li>请根据您的真实情况回答，没有对错之分</li>
+                <li>您的回答将被匿名处理，仅用于学术研究</li>
+                <li>您可以随时退出研究，无需说明理由</li>
+            </ul>
+            
+            <h3>隐私保护：</h3>
+            <p>我们承诺严格保护您的隐私：</p>
+            <ul>
+                <li>不会收集任何个人身份信息</li>
+                <li>数据将以匿名形式存储和分析</li>
+                <li>研究结果将以汇总形式报告</li>
+                <li>您的参与完全自愿</li>
+            </ul>
+            
+            <p>如果您对研究有任何疑问，请联系研究人员。</p>
+        </div>
+        
+        <div class="checkbox-container">
+            <label>
+                <input type="checkbox" id="consentCheckbox">
+                我已阅读并理解上述信息，同意参与本研究
+            </label>
+        </div>
+        
+        <button id="nextButton" disabled>开始测试</button>
+    </div>
+
+    <!-- 测试表单部分（原本应该有70个问题，但这里简化了） -->
+    <form id="testForm" class="hidden">
+        <!-- 这里原本应该包含70个问题 -->
+        <div class="question">
+            <p>测试问题将在这里显示...</p>
+        </div>
+        <button type="submit">提交测试</button>
+    </form>
+
+    <script>
+        // 获取DOM元素
+        const consentCheckbox = document.getElementById('consentCheckbox');
+        const nextButton = document.getElementById('nextButton');
+        const testForm = document.getElementById('testForm');
+        const consentSection = document.querySelector('.consent-section');
+
+        // 同意复选框变化事件
+        consentCheckbox.addEventListener('change', function() {
+            nextButton.disabled = !this.checked;
+        });
+
+        // 下一步按钮点击事件
+        nextButton.addEventListener('click', function() {
+            if (consentCheckbox.checked) {
+                // 隐藏同意部分，显示测试表单
+                consentSection.classList.add('hidden');
+                testForm.classList.remove('hidden');
+                // 这里应该跳转到问卷页面，或者显示问卷内容
+                window.location.href = "questionnaire.html"; 
+            } else {
+                alert("请先同意研究条款才能继续。");
+            }
+        });
+
+        // 测试表单提交事件
+        document.getElementById('testForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // 收集表单数据
+            const formData = new FormData(this);
+            const userScores = {};
+            
+            for (const [key, value] of formData.entries()) {
+                userScores[key] = parseInt(value);
+            }
+            
+            try {
+                // 发送数据到后端
+                const response = await fetch('http://localhost:3000/api/rankings', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(userScores)
+                });
+                
+                if (!response.ok) {
+                    throw new Error('服务器响应错误');
+                }
+                
+                const result = await response.json();
+                
+                // 构建结果页面的URL参数
+                const params = new URLSearchParams();
+                
+                // 添加每个维度的分数和排名
+                for (const dim of Object.keys(userScores)) {
+                    params.append(`score_${dim}`, userScores[dim]);
+                    params.append(`rank_${dim}`, result.rankings[dim]);
+                }
+                
+                // 添加数据库统计信息
+                params.append('totalUsers', result.totalUsers);
+                params.append('userNumber', result.userNumber);
+                
+                // 跳转到结果页面
+                window.location.href = `results.html?${params.toString()}`;
+                
+            } catch (error) {
+                console.error('提交测试时出错:', error);
+                alert('提交测试时出错，请稍后重试。');
+            }
+        });
+    </script>
+</body>
+</html>
