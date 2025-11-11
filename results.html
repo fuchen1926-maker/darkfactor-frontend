@@ -16,6 +16,7 @@
             --border-color: #2d3047;
             --radar-bg: #ffffff; /* 雷达图背景色 */
             --radar-text: #333333; /* 雷达图文字颜色 */
+            --radar-grid: #e0e0e0; /* 雷达图网格线颜色 - 浅灰色 */
         }
         
         * {
@@ -841,20 +842,24 @@
                             r: {
                                 angleLines: {
                                     display: true,
-                                    color: 'rgba(0, 0, 0, 0.2)' // 调整为深色线条
+                                    color: 'rgba(224, 224, 224, 0.8)' // 调整为浅灰色线条
                                 },
                                 grid: {
-                                    color: 'rgba(0, 0, 0, 0.2)' // 调整为深色网格线
+                                    color: 'rgba(224, 224, 224, 0.8)' // 调整为浅灰色网格线
                                 },
                                 suggestedMin: 0,
                                 suggestedMax: 100,
                                 ticks: {
                                     stepSize: 10, // 设置为10，这样就有10环
                                     backdropColor: 'transparent',
-                                    color: '#333333', // 调整为黑色文字
+                                    color: '#666666', // 调整为中灰色文字
                                     font: {
                                         size: tickFontSize,
                                         weight: 'bold'
+                                    },
+                                    // 添加百分比符号
+                                    callback: function(value) {
+                                        return value + '%';
                                     }
                                 },
                                 pointLabels: {
@@ -862,7 +867,7 @@
                                         size: pointLabelFontSize,
                                         weight: 'bold'
                                     },
-                                    color: '#333333' // 调整为黑色文字
+                                    color: '#666666' // 调整为中灰色文字
                                 }
                             }
                         },
@@ -874,7 +879,7 @@
                                         size: legendFontSize,
                                         weight: 'bold'
                                     },
-                                    color: '#333333', // 调整为黑色文字
+                                    color: '#666666', // 调整为中灰色文字
                                     padding: 15
                                 }
                             },
