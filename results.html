@@ -81,14 +81,15 @@
             }
         }
         
+        /* 调大雷达图容器尺寸 */
         .chart-container { 
             width: 100%; 
             max-width: 900px; 
-            height: 600px;
+            height: 700px; /* 增加高度 */
             margin: 30px auto; 
             border: 1px solid var(--border-color); 
             border-radius: 12px; 
-            padding: 20px; 
+            padding: 15px; /* 减少内边距以提供更多空间 */
             background-color: var(--card-bg);
             box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
             position: relative;
@@ -367,10 +368,10 @@
                 padding: 10px;
             }
             
-            /* 重点优化：调整雷达图容器尺寸和内边距 */
+            /* 重点优化：调大雷达图容器尺寸 */
             .chart-container {
-                height: 500px;
-                padding: 10px;
+                height: 600px; /* 增加高度 */
+                padding: 8px; /* 进一步减少内边距 */
             }
             
             .flat-pie-container {
@@ -408,8 +409,8 @@
         @media (max-width: 480px) {
             /* 重点优化：在更小的屏幕上进一步调整雷达图 */
             .chart-container {
-                height: 450px;
-                padding: 5px;
+                height: 550px; /* 增加高度 */
+                padding: 5px; /* 进一步减少内边距 */
             }
             
             .flat-pie-container {
@@ -799,9 +800,11 @@
             try {
                 // 根据屏幕宽度动态调整字体大小
                 const screenWidth = window.innerWidth;
-                const pointLabelFontSize = screenWidth < 768 ? 10 : 14;
-                const tickFontSize = screenWidth < 768 ? 10 : 12;
-                const legendFontSize = screenWidth < 768 ? 12 : 14;
+                const pointLabelFontSize = screenWidth < 768 ? 8 : 12; // 进一步缩小字体
+                const tickFontSize = screenWidth < 768 ? 8 : 10; // 进一步缩小字体
+                const legendFontSize = screenWidth < 768 ? 10 : 12; // 进一步缩小字体
+                const pointRadius = screenWidth < 768 ? 2 : 3; // 缩小数据点半径
+                const pointHoverRadius = screenWidth < 768 ? 3 : 4; // 缩小悬停数据点半径
 
                 const config = {
                     type: 'radar',
@@ -814,9 +817,9 @@
                             borderColor: 'rgb(233, 69, 96)',
                             pointBackgroundColor: 'rgb(233, 69, 96)',
                             pointBorderColor: '#fff',
-                            pointRadius: screenWidth < 768 ? 4 : 5,
-                            pointHoverRadius: screenWidth < 768 ? 5 : 7,
-                            borderWidth: 3
+                            pointRadius: pointRadius,
+                            pointHoverRadius: pointHoverRadius,
+                            borderWidth: 2
                         }, {
                             label: '我的排名',
                             data: userRankings, 
@@ -824,9 +827,9 @@
                             borderColor: 'rgb(54, 162, 235)',
                             pointBackgroundColor: 'rgb(54, 162, 235)',
                             pointBorderColor: '#fff',
-                            pointRadius: screenWidth < 768 ? 4 : 5,
-                            pointHoverRadius: screenWidth < 768 ? 5 : 7,
-                            borderWidth: 3
+                            pointRadius: pointRadius,
+                            pointHoverRadius: pointHoverRadius,
+                            borderWidth: 2
                         }]
                     },
                     options: {
@@ -844,7 +847,7 @@
                                 suggestedMin: 0,
                                 suggestedMax: 100,
                                 ticks: {
-                                    stepSize: 20,
+                                    stepSize: 10, // 设置为10，这样就有10环
                                     backdropColor: 'transparent',
                                     color: 'rgba(255, 255, 255, 0.7)',
                                     font: {
@@ -870,7 +873,7 @@
                                         weight: 'bold'
                                     },
                                     color: 'rgba(255, 255, 255, 0.9)',
-                                    padding: 20
+                                    padding: 15
                                 }
                             },
                             tooltip: {
